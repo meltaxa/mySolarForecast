@@ -1,0 +1,4 @@
+solcast>=0.2.1
+influxdb>=4.1.1
+ast>=0.0.2
+bs4>=0.0.1

@@ -1,0 +1,51 @@
+service: mySolarForecast
+
+provider:
+  name: aws
+  stage: production
+  runtime: python2.7
+  region: us-west-2
+  memorySize: 128
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ssm:GetParameters"
+        - "ssm:PutParameter"
+      Resource: "arn:aws:ssm:*:*:*"
+  timeout: 300
+  environment:
+    influxdb_ip: "XXX.XXX.XXX.XXX"
+    influxdb_port: XXXX
+    influxdb_user: "XXXXXXXX"
+    influxdb_password: "XXXXXXXX"
+    influxdb_database: "XXXXXXXX"
+    influxdb_ssl: "True or False"
+    influxdb_verify_ssl: "False or True"
+    influxdb_measurement: "XXXXXXXX"
+    influxdb_location: "XXXXXXXX"
+    long: -XX.XXXXXX
+    lat: XXX.XXXXX
+    solcast_api_key: "XXXXXXXX"
+    pv_roof: "[(XXX,XXXX),(-XX,XXXX)]"
+
+package:
+  include:
+    - mySolarForecast.py
+  exclude:
+    - .git/**
+    - docs/**
+    - README.md
+functions:
+  mySolarForecast:
+    name: mySolarForecast
+    description: Fetch latest Solar metrics and send to PV Output
+    handler: mySolarForecast.lambda_handler
+    events:
+      - schedule:
+          name: run-lambda-mySolarForecast-every-hour
+          rate: cron(0 * * * ? *)
+          description: Used by the mySolarForecast Lamdba function.
+          enabled: true
+
+plugins:
+  - serverless-python-requirements
