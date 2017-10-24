@@ -27,6 +27,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from_zone = tz.gettz('UTC')
 to_zone = tz.gettz('Australia/Brisbane')
 
+today_fmt = datetime.datetime.strftime(datetime.date.today(), "%Y/%m/%d")
 tomoz = datetime.date.today() + datetime.timedelta(days=1)
 tomoz_fmt = datetime.datetime.strftime(tomoz, "%Y/%m/%d")
 
@@ -73,12 +74,11 @@ def get_solcast(capacity,azimuth):
     period_tz = period_end.astimezone(to_zone)
     pv_estimate = period['pv_estimate']
     pv_date = datetime.datetime.strftime(period_tz, '%Y/%m/%d')
-    if pv_date == tomoz_fmt:
-      try:
-        forecast_date[pv_date] += float(pv_estimate) / 1000
-      except:
-        forecast_date[pv_date] = float(pv_estimate)/ 1000
-  return forecast_date[tomoz_fmt]
+    try:
+      forecast_date[pv_date] += float(pv_estimate) / 1000
+    except:
+      forecast_date[pv_date] = float(pv_estimate)/ 1000
+  return forecast_date
 
 url = "http://www.nemweb.com.au/Reports/Current/ROOFTOP_PV/FORECAST"
 html = urllib2.urlopen(url).read()
@@ -122,9 +122,15 @@ def lambda_handler(event, context):
                   os.environ['influxdb_database'],
                   ssl=ast.literal_eval(os.environ['influxdb_ssl']),
                   verify_ssl=ast.literal_eval(os.environ['influxdb_verify_ssl']))
+  
   total = 0
+  total_today = 0
   for pair in ast.literal_eval(os.environ['pv_roof']):
-    total += get_solcast(pair[1],pair[0]) /2
+    forecasts = get_solcast(pair[1],pair[0])
+    total += forecasts[tomoz_fmt]
+    total_today += forecasts[today_fmt]
+  total = total / 2
+  total_today = total_today / 2
   metrics = {}
   tags = {}
   fields = {}
@@ -133,8 +139,9 @@ def lambda_handler(event, context):
   metrics['tags'] = tags
   pv_forecast = {}
   pv_forecast['pv_solcast'] = total
+  pv_forecast['pv_solcast_today'] = total_today
   metrics['fields'] = pv_forecast
-  print tomoz, total
+  print tomoz, total_today, total
   flux_client.write_points([metrics])
   print "[INFO] Sent Solcast to InfluxDB"
 
@@ -148,4 +155,4 @@ def lambda_handler(event, context):
         pv_forecast['pv_forecast'] = forecast_date[key]
         metrics['fields'] = pv_forecast
         flux_client.write_points([metrics])
-        print "[INFO] Sent ASEFSto InfluxDB"
+        print "[INFO] Sent ASEFS to InfluxDB"
