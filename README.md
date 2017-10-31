@@ -19,6 +19,8 @@ charges (a few cents per month) for Amazon S3 and data transfers.
 
 To deploy the AWS Lamdba function, the [Serverless](https://serverless.com/framework/docs/providers/aws/guide/installation/) framework is used.
 
+You will need to register with Solcast for an API key.
+
 ## Installation
 
 1. Download or clone this repository to your local workstation.
@@ -36,7 +38,7 @@ deploy the code and it's dependancies.
 
 3. Setup your AWS Profile as per [Serverless guidelines](https://serverless.com/framework/docs/providers/aws/guide/credentials/).
 
-4. Edit serverless.yml and update the following API credentials and UTC timezone offset:
+4. Edit serverless.yml and update the following custom values:
 
    ```
    influxdb_ip: "XXX.XXX.XXX.XXX"
@@ -77,9 +79,9 @@ mySolarForecast uses InfluxDB as a time series database to store the forecasts.
 
 The following metrics are available:
 
-pv_solcast for tomorrow's Solcast's forecast.
-pv_solcast_today for the Solar forecast for the remainder of the day.
-pv_forecast for tomorrow's ASEFS's forecast.
+- pv_solcast for tomorrow's Solcast's forecast.
+- pv_solcast_today for the Solar forecast for the remainder of the day.
+- pv_forecast for tomorrow's ASEFS's forecast.
 
 To display the data in real time dashboard, you can use 
 [Grafana](https://grafana.com/get) to pull the metrics from InfluxDB. You can 
