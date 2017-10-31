@@ -2,8 +2,8 @@
 
 ![alt tag](docs/example-grafana-panels.png)
 
-Retrieve Solar PV forecasts from Solcast and the [Australia Solar Energy 
-Forecast System (ASEFS)](https://www.aemo.com.au/Electricity/National-Electricity-Market-NEM/Planning-and-forecasting/Solar-and-wind-energy-forecasting).
+Retrieve Solar PV forecasts from [Solcast](https://solcast.com.au/) and the 
+[Australia Solar Energy Forecast System (ASEFS)](https://www.aemo.com.au/Electricity/National-Electricity-Market-NEM/Planning-and-forecasting/Solar-and-wind-energy-forecasting).
 
 Two Solar PV forecast sources are used for comparison purposes. The forecasts 
 are recorded in InfluxDB.
@@ -19,7 +19,7 @@ charges (a few cents per month) for Amazon S3 and data transfers.
 
 To deploy the AWS Lamdba function, the [Serverless](https://serverless.com/framework/docs/providers/aws/guide/installation/) framework is used.
 
-You will need to register with Solcast for an API key.
+You will need to register with Solcast for an API key: https://solcast.com.au/api/register/
 
 ## Installation
 
