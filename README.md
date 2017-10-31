@@ -8,7 +8,7 @@ Retrieve Solar PV forecasts from [Solcast](https://solcast.com.au/) and the
 Two Solar PV forecast sources are used for comparison purposes. The forecasts 
 are recorded in InfluxDB.
 
-## Prequisites
+## Prerequisites
 
 An [AWS account](https://aws.amazon.com). mySolarForecast is an AWS Lamdba 
 function. 
@@ -20,6 +20,8 @@ charges (a few cents per month) for Amazon S3 and data transfers.
 To deploy the AWS Lamdba function, the [Serverless](https://serverless.com/framework/docs/providers/aws/guide/installation/) framework is used.
 
 You will need to register with Solcast for an API key: https://solcast.com.au/api/register/
+
+You will need an InfluxDB to stream metrics to.
 
 ## Installation
 
