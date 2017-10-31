@@ -38,12 +38,12 @@ package:
 functions:
   mySolarForecast:
     name: mySolarForecast
-    description: Fetch latest Solar metrics and send to PV Output
+    description: Get Solar PV forecasts for the rest of the day and tomorrow.
     handler: mySolarForecast.lambda_handler
     events:
       - schedule:
           name: run-lambda-mySolarForecast-every-hour
-          rate: cron(0 * * * ? *)
+          rate: cron(5,35 * * * ? *)
           description: Used by the mySolarForecast Lamdba function.
           enabled: true
 
