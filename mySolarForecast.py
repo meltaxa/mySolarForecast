@@ -9,7 +9,8 @@
 import boto3
 import solcast
 from dateutil import tz
-import datetime
+from datetime import datetime, timedelta
+import pytz
 from influxdb import InfluxDBClient
 import urllib3
 import os
@@ -26,10 +27,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from_zone = tz.gettz('UTC')
 to_zone = tz.gettz('Australia/Brisbane')
-
-today_fmt = datetime.datetime.strftime(datetime.date.today(), "%Y/%m/%d")
-tomoz = datetime.date.today() + datetime.timedelta(days=1)
-tomoz_fmt = datetime.datetime.strftime(tomoz, "%Y/%m/%d")
 
 def get_param_store(name):
     ssm = boto3.client('ssm')
@@ -73,7 +70,7 @@ def get_solcast(capacity,azimuth):
     period_end = period_end.replace(tzinfo=from_zone)
     period_tz = period_end.astimezone(to_zone)
     pv_estimate = period['pv_estimate']
-    pv_date = datetime.datetime.strftime(period_tz, '%Y/%m/%d')
+    pv_date = datetime.strftime(period_tz, '%Y/%m/%d')
     try:
       forecast_date[pv_date] += float(pv_estimate) / 1000
     except:
@@ -87,9 +84,6 @@ soup = BeautifulSoup(html, "html.parser")
 def get_asefs():
 #
 # Download and unzip the latest ASEFS2 report and get the forecast power mean.
-# Assumptions made: Rooftop PV is a 3K system. This script converts it to a
-# 5K forecast.
-# 
 #
   last_time = get_param_store("lambda.last_time")
   last_link = soup.find_all('a', href=True)[-1]
@@ -105,12 +99,12 @@ def get_asefs():
       reader = csv.reader([line])
       for r in reader:
         if len(r) == 12 and r[5] == "QLD1":
-          dt = datetime.datetime.strptime(r[6], "%Y/%m/%d %H:%M:%S")
-          dt_fmt = datetime.datetime.strftime(dt, "%Y/%m/%d")
+          dt = datetime.strptime(r[6], "%Y/%m/%d %H:%M:%S")
+          dt_fmt = datetime.strftime(dt, "%Y/%m/%d")
           try:
-            forecast_date[dt_fmt] += float(r[7]) / 1000 * 1.666
+            forecast_date[dt_fmt] += float(r[7]) / 1000 
           except:
-            forecast_date[dt_fmt] = float(r[7]) / 1000 * 1.666
+            forecast_date[dt_fmt] = float(r[7]) / 1000
   return forecast_date
 
 def lambda_handler(event, context):
@@ -123,6 +117,11 @@ def lambda_handler(event, context):
                   ssl=ast.literal_eval(os.environ['influxdb_ssl']),
                   verify_ssl=ast.literal_eval(os.environ['influxdb_verify_ssl']))
   
+  today = datetime.now(pytz.timezone('Australia/Brisbane'))
+  tomoz = today + timedelta(days=1)
+  today_fmt = datetime.strftime(today, "%Y/%m/%d")
+  tomoz_fmt = datetime.strftime(tomoz, "%Y/%m/%d")
+  print today_fmt, tomoz_fmt
   total = 0
   total_today = 0
   for pair in ast.literal_eval(os.environ['pv_roof']):
